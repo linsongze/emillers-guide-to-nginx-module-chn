@@ -1,47 +1,47 @@
 = Emiller's Guide To Nginx Module Development =
 
-By [/ Evan Miller]
+By [https://code.googhttps:/ Evan Miller]
 
-DRAFT: August 13, 2009 ([#changes changes])
+DRAFT: August 13, 2009 ([https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#changes changes])
 
 == Table of Contents ==
 
-  # [#prerequisites Prerequisites]
-  # [#overview High-Level Overview of Nginx's Module Delegation]
-  # [#components Components of an Nginx Module]
-    # [#configuration-structs Module Configuration Struct(s)]
-    # [#directives Module Directives]
-    # [#context The Module Context]
-      # [#create_loc_conf create_loc_conf]
-      # [#merge_loc_conf merge_loc_conf]
-    # [#definition The Module Definition]
-    # [#installation Module Installation]
-  # [#handlers Handlers]
-    # [#non-proxying Anatomy of a Handler (Non-proxying)]
-      # [#non-proxying-config Getting the location configuration]
-      # [#non-proxying-response Generating a response]
-      # [#non-proxying-header Sending the header]
-      # [#non-proxying-body Sending the body]
-    # [#proxying Anatomy of an Upstream (a.k.a. Proxy) Handler]
-      # [#proxying-summary Summary of upstream callbacks]
-      # [#create_request The create_request callback]
-      # [#process_header The process_header callback]
-      # [#keeping-state Keeping state]
-    # [#handler-installation Handler Installation]
-  # [#filters Filters]
-    # [#filters-header Anatomy of a Header Filter]
-    # [#filters-body Anatomy of a Body Filter]
-    # [#filters-installation Filter Installation]
-  # [#load_balancers Load-Balancers]
-    # [#lb-directive The enabling directive]
-    # [#lb-registration The registration function]
-    # [#lb-upstream The upstream initialization function]
-    # [#lb-peer The peer initialization function]
-    # [#lb-function The load-balancing function]
-    # [#lb-release The peer release function]
-  # [#compiling Writing and Compiling a New Nginx Module]
-  # [#advanced Advanced Topics]
-  # [#code Code References]
+  # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#prerequisites Prerequisites]
+  # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#overview High-Level Overview of Nginx's Module Delegation]
+  # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#components Components of an Nginx Module]
+    # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#configuration-structs Module Configuration Struct(s)]
+    # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#directives Module Directives]
+    # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#context The Module Context]
+      # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#create_loc_conf create_loc_conf]
+      # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#merge_loc_conf merge_loc_conf]
+    # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#definition The Module Definition]
+    # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#installation Module Installation]
+  # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#handlers Handlers]
+    # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#non-proxying Anatomy of a Handler (Non-proxying)]
+      # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#non-proxying-config Getting the location configuration]
+      # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#non-proxying-response Generating a response]
+      # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#non-proxying-header Sending the header]
+      # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#non-proxying-body Sending the body]
+    # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#proxying Anatomy of an Upstream (a.k.a. Proxy) Handler]
+      # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#proxying-summary Summary of upstream callbacks]
+      # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#create_request The create_request callback]
+      # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#process_header The process_header callback]
+      # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#keeping-state Keeping state]
+    # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#handler-installation Handler Installation]
+  # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#filters Filters]
+    # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#filters-header Anatomy of a Header Filter]
+    # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#filters-body Anatomy of a Body Filter]
+    # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#filters-installation Filter Installation]
+  # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#load_balancers Load-Balancers]
+    # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#lb-directive The enabling directive]
+    # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#lb-registration The registration function]
+    # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#lb-upstream The upstream initialization function]
+    # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#lb-peer The peer initialization function]
+    # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#lb-function The load-balancing function]
+    # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#lb-release The peer release function]
+  # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#compiling Writing and Compiling a New Nginx Module]
+  # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#advanced Advanced Topics]
+  # [https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/EmillerNginxGuide#code Code References]
 
 == 0. Prerequisites ==
 
@@ -116,7 +116,7 @@ Modules can define up to three configuration structs, one for the main, server, 
  } ngx_http_dav_loc_conf_t;
  }}} `
 
-Notice that Nginx has special data types (`ngx_uint_t` and `ngx_flag_t`); these are just aliases for the primitive data types you know and love (cf. [/lxr/http/source/core/ngx_config.h#L79 core/ngx_config.h] if you're curious).
+Notice that Nginx has special data types (`ngx_uint_t` and `ngx_flag_t`); these are just aliases for the primitive data types you know and love (cf. [https://code.googhttps:/lxr/http/source/core/ngx_config.h#L79 core/ngx_config.h] if you're curious).
 
 The elements in the configuration structs are populated by module directives.
 
@@ -142,7 +142,7 @@ A module's directives appear in a static array of `ngx_command_t`s. Here's an ex
  };
  }}} `
 
-And here is the declaration of `ngx_command_t` (the struct we're declaring), found in [/lxr/http/source/core/ngx_conf_file.h#L77 core/ngx_conf_file.h]:
+And here is the declaration of `ngx_command_t` (the struct we're declaring), found in [https://code.googhttps:/lxr/http/source/core/ngx_conf_file.h#L77 core/ngx_conf_file.h]:
 
 ` {{{ struct ngx_command_t {
      ngx_str_t             name;
@@ -175,7 +175,7 @@ The `name` is the directive string, no spaces. The data type is an `ngx_str_t`, 
   * `NGX_CONF_1MORE`: directive must be passed at least one argument
   * `NGX_CONF_2MORE`: directive must be passed at least two arguments
 
-There are a few other options, too, see [/lxr/http/source/core/ngx_conf_file.h#L1 core/ngx_conf_file.h].
+There are a few other options, too, see [https://code.googhttps:/lxr/http/source/core/ngx_conf_file.h#L1 core/ngx_conf_file.h].
 
 The `set` struct element is a pointer to a function for setting up part of the module's configuration; typically this function will translate the arguments passed to this directive and save an appropriate value in its configuration struct. This setup function will take three arguments:
 
@@ -190,7 +190,7 @@ This setup function will be called when the directive is encountered. Nginx prov
   * `ngx_conf_set_num_slot`: parses a number and saves it to an `int`
   * `ngx_conf_set_size_slot`: parses a data size ("8k", "1m", etc.) and saves it to a `size_t`
 
-There are several others, and they're quite handy (see [/lxr/http/source/core/ngx_conf_file.h#L329 core/ngx_conf_file.h]). Modules can also put a reference to their own function here, if the built-ins aren't quite good enough.
+There are several others, and they're quite handy (see [https://code.googhttps:/lxr/http/source/core/ngx_conf_file.h#L329 core/ngx_conf_file.h]). Modules can also put a reference to their own function here, if the built-ins aren't quite good enough.
 
 How do these built-in functions know where to save the data? That's where the next two elements of `ngx_command_t` come in, `conf` and `offset`. `conf` tells Nginx whether this value will get saved to the module's main configuration, server configuration, or location configuration (with `NGX_HTTP_MAIN_CONF_OFFSET`, `NGX_HTTP_SRV_CONF_OFFSET`, or `NGX_HTTP_LOC_CONF_OFFSET`). `offset` then specifies which part of this configuration struct to write to.
 
@@ -211,7 +211,7 @@ This is a static `ngx_http_module_t` struct, which just has a bunch of function 
   * creating the location conf
   * merging it with the server conf
 
-These take different arguments depending on what they're doing. Here's the struct definition, taken from [/lxr/http/source/http/ngx_http_config.h#L22 http/ngx_http_config.h], so you can see the different function signatures of the callbacks:
+These take different arguments depending on what they're doing. Here's the struct definition, taken from [https://code.googhttps:/lxr/http/source/http/ngx_http_config.h#L22 http/ngx_http_config.h], so you can see the different function signatures of the callbacks:
 
 ` {{{ typedef struct {
      ngx_int_t   (*preconfiguration)(ngx_conf_t *cf);
@@ -247,7 +247,7 @@ Time to dig in deep a little bit. These configuration callbacks look quite simil
 
 ==== 2.3.1. create_loc_conf ====
 
-Here's what a bare-bones create_loc_conf function looks like, taken from the circle_gif module I wrote (see the [/nginx/ngx_http_circle_gif_module.c.txt the source]). It takes a directive struct (`ngx_conf_t`) and returns a newly created module configuration struct (in this case `ngx_http_circle_gif_loc_conf_t`).
+Here's what a bare-bones create_loc_conf function looks like, taken from the circle_gif module I wrote (see the [https://code.googhttps:/nginx/ngx_http_circle_gif_module.c.txt the source]). It takes a directive struct (`ngx_conf_t`) and returns a newly created module configuration struct (in this case `ngx_http_circle_gif_loc_conf_t`).
 
 ` {{{ static void *
  ngx_http_circle_gif_create_loc_conf(ngx_conf_t *cf)
@@ -298,13 +298,13 @@ Notice first that Nginx provides nice merging functions for different data types
   # the value to inherit if #1 is not set
   # the default if neither #1 nor #2 is set
 
-The result is then stored in the first argument. Available merge functions include `ngx_conf_merge_size_value`, `ngx_conf_merge_msec_value`, and others. See [/lxr/http/source/core/ngx_conf_file.h#L254 core/ngx_conf_file.h] for a full list.
+The result is then stored in the first argument. Available merge functions include `ngx_conf_merge_size_value`, `ngx_conf_merge_msec_value`, and others. See [https://code.googhttps:/lxr/http/source/core/ngx_conf_file.h#L254 core/ngx_conf_file.h] for a full list.
 
 Trivia question: How do these functions write to the first argument, since the first argument is passed in by value?
 
 Answer: these functions are defined by the preprocessor (so they expand to a few "if" statements and assignments before reaching the compiler).
 
-Notice also how errors are produced; the function writes something to the log file, and returns `NGX_CONF_ERROR`. That return code halts server startup. (Since the message is logged at level `NGX_LOG_EMERG`, the message will also go to standard out; FYI, [/lxr/http/source/core/ngx_log.h#L1 core/ngx_log.h] has a list of log levels.)
+Notice also how errors are produced; the function writes something to the log file, and returns `NGX_CONF_ERROR`. That return code halts server startup. (Since the message is logged at level `NGX_LOG_EMERG`, the message will also go to standard out; FYI, [https://code.googhttps:/lxr/http/source/core/ngx_log.h#L1 core/ngx_log.h] has a list of log levels.)
 
 === 2.4. The Module Definition ===
 
@@ -326,7 +326,7 @@ Next we add one more layer of indirection, the `ngx_module_t` struct. The variab
  };
  }}} `
 
-...substituting <module name> appropriately. Modules can add callbacks for process/thread creation and death, but most modules keep things simple. (For the arguments passed to each callback, see [/lxr/http/source/core/ngx_conf_file.h#L110 core/ngx_conf_file.h].)
+...substituting <module name> appropriately. Modules can add callbacks for process/thread creation and death, but most modules keep things simple. (For the arguments passed to each callback, see [https://code.googhttps:/lxr/http/source/core/ngx_conf_file.h#L110 core/ngx_conf_file.h].)
 
 === 2.5. Module Installation ===
 
@@ -375,9 +375,9 @@ The request struct will be helpful here, particularly these elements:
 
 `args` is the part of the request after the question mark (e.g. "name=john").
 
-`headers_in` has a lot of useful stuff, such as cookies and browser information, but many modules don't need anything from it. See [/lxr/http/source/http/ngx_http_request.h#L158 http/ngx_http_request.h] if you're interested.
+`headers_in` has a lot of useful stuff, such as cookies and browser information, but many modules don't need anything from it. See [https://code.googhttps:/lxr/http/source/http/ngx_http_request.h#L158 http/ngx_http_request.h] if you're interested.
 
-This should be enough information to produce some useful output. The full `ngx_http_request_t` struct can be found in [/lxr/http/source/http/ngx_http_request.h#L316 http/ngx_http_request.h].
+This should be enough information to produce some useful output. The full `ngx_http_request_t` struct can be found in [https://code.googhttps:/lxr/http/source/http/ngx_http_request.h#L316 http/ngx_http_request.h].
 
 ==== 3.1.3. Sending the header ====
 
@@ -396,7 +396,7 @@ The response headers live in a struct called `headers_out` referenced by the req
  } ngx_http_headers_out_t;
  }}} `
 
-(The rest can be found in [/lxr/http/source/http/ngx_http_request.h#L220 http/ngx_http_request.h].)
+(The rest can be found in [https://code.googhttps:/lxr/http/source/http/ngx_http_request.h#L220 http/ngx_http_request.h].)
 
 So for example, if a module were to set the Content-Type to "image/gif", Content-Length to 100, and return a 200 OK response, this code would do the trick:
 
@@ -581,7 +581,7 @@ Here's a bare-minimum example, reading in that two-character response. Let's sup
  }
  }}} `
 
-That's it. Manipulate the header, change the pointer, it's done. Notice that `headers_in` is actually a response header struct like we've seen before (cf. [/lxr/http/source/http/ngx_http_request.h#L158 http/ngx_http_request.h]), but it can be populated with the headers from the upstream. A real proxying module will do a lot more header processing, not to mention error handling, but you get the main idea.
+That's it. Manipulate the header, change the pointer, it's done. Notice that `headers_in` is actually a response header struct like we've seen before (cf. [https://code.googhttps:/lxr/http/source/http/ngx_http_request.h#L158 http/ngx_http_request.h]), but it can be populated with the headers from the upstream. A real proxying module will do a lot more header processing, not to mention error handling, but you get the main idea.
 
 But.. what if we don't have the whole header from the upstream in one buffer?
 
@@ -667,7 +667,7 @@ To take an example, here's a simplified version of the "not modified" header fil
  }
  }}} `
 
-The `headers_out` structure is just the same as we saw in the section about handlers (cf. [/lxr/http/source/http/ngx_http_request.h#L220 http/ngx_http_request.h]), and can be manipulated to no end.
+The `headers_out` structure is just the same as we saw in the section about handlers (cf. [https://code.googhttps:/lxr/http/source/http/ngx_http_request.h#L220 http/ngx_http_request.h]), and can be manipulated to no end.
 
 === 4.2. Anatomy of a Body Filter ===
 
@@ -781,7 +781,7 @@ Thus, if the filter chain reaches the (specially-defined) end of the chain, an "
 
 == 5. Load-Balancers ==
 
-A load-balancer is just a way to decide which backend server will receive a particular request; implementations exist for distributing requests in round-robin fashion or hashing some information about the request. This section will describe both a load-balancer's installation and its invocation, using the upstream_hash module ([/nginx/ngx_http_upstream_hash_module.c.txt full source]) as an example. upstream_hash chooses a backend by hashing a variable specified in nginx.conf.
+A load-balancer is just a way to decide which backend server will receive a particular request; implementations exist for distributing requests in round-robin fashion or hashing some information about the request. This section will describe both a load-balancer's installation and its invocation, using the upstream_hash module ([https://code.googhttps:/nginx/ngx_http_upstream_hash_module.c.txt full source]) as an example. upstream_hash chooses a backend by hashing a variable specified in nginx.conf.
 
 A load-balancing module has six pieces:
 
@@ -904,7 +904,7 @@ The purpose of the upstream initialization function is to resolve the host names
  }
  }}} `
 
-This function is a bit more involved than one might hope. Most of the work seems like it should be abstracted, but it's not, so that's what we live with. One strategy for simplifying things is to call the upstream initialization function of another module, have it do all the dirty work (peer allocation, etc), and then override the `us->peer.init` callback afterwards. For an example, see [/lxr/http/source/http/modules/ngx_http_upstream_ip_hash_module.c#L80 http/modules/ngx_http_upstream_ip_hash_module.c].
+This function is a bit more involved than one might hope. Most of the work seems like it should be abstracted, but it's not, so that's what we live with. One strategy for simplifying things is to call the upstream initialization function of another module, have it do all the dirty work (peer allocation, etc), and then override the `us->peer.init` callback afterwards. For an example, see [https://code.googhttps:/lxr/http/source/http/modules/ngx_http_upstream_ip_hash_module.c#L80 http/modules/ngx_http_upstream_ip_hash_module.c].
 
 The important bit from our point of view is setting a pointer to the _peer initialization function_, in this case `ngx_http_upstream_init_upstream_hash_peer`.
 
@@ -1039,7 +1039,7 @@ Many applications won't need retry or high-availability logic, but it's possible
 
 == 6. Writing and Compiling a New Nginx Module ==
 
-So by now, you should be prepared to look at an Nginx module and try to understand what's going on (and you'll know where to look for help). Take a look in [/lxr/http/source/http/modules/ src/http/modules/] to see the available modules. Pick a module that's similar to what you're trying to accomplish and look through it. Stuff look familiar? It should. Refer between this guide and the module source to get an understanding about what's going on.
+So by now, you should be prepared to look at an Nginx module and try to understand what's going on (and you'll know where to look for help). Take a look in [https://code.googhttps:/lxr/http/source/http/modules/ src/http/modules/] to see the available modules. Pick a module that's similar to what you're trying to accomplish and look through it. Stuff look familiar? It should. Refer between this guide and the module source to get an understanding about what's going on.
 
 But Emiller didn't write a _Balls-In Guide to Reading Nginx Modules_. Hell no. This is a _Balls-Out Guide_. We're not reading. We're writing. Creating. Sharing with the world.
 
@@ -1080,24 +1080,24 @@ Where `foo` is the library you need. If you make a cool or useful module, be sur
 
 == 7. Advanced Topics ==
 
-This guide covers the basics of Nginx module development. For tips on writing more sophisticated modules, be sure to check out _[nginx-modules-guide-advanced.html Emiller's Advanced Topics In Nginx Module Development]_.
+This guide covers the basics of Nginx module development. For tips on writing more sophisticated modules, be sure to check out _[https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/nginx-modules-guide-advanced.html Emiller's Advanced Topics In Nginx Module Development]_.
 
 == Appendix A: Code References ==
 
-[/lxr/http/source/ Nginx source tree (cross-referenced)]
+[https://code.googhttps:/lxr/http/source/ Nginx source tree (cross-referenced)]
 
-[/lxr/http/source/http/modules/ Nginx module directory (cross-referenced)]
+[https://code.googhttps:/lxr/http/source/http/modules/ Nginx module directory (cross-referenced)]
 
-[/nginx/ngx_http_circle_gif_module.c.txt Example addon: circle_gif]
+[https://code.googhttps:/nginx/ngx_http_circle_gif_module.c.txt Example addon: circle_gif]
 
-[/nginx/ngx_http_upstream_hash_module.c.txt Example addon: upstream_hash]
+[https://code.googhttps:/nginx/ngx_http_upstream_hash_module.c.txt Example addon: upstream_hash]
 
 [http://github.com/gnosek/nginx-upstream-fair/tree/master Example addon: upstream_fair]
 
 == Appendix B: Changelog ==
 
   * November 11, 2009: Corrected code sample in 4.2.
-  * August 13, 2009: Reorganized, and moved _[nginx-modules-guide-advanced.html Advanced Topics]_ to a separate article.
+  * August 13, 2009: Reorganized, and moved _[https://code.googhttps://code.google.com/p/emillers-guide-to-nginx-module-chn/wiki/nginx-modules-guide-advanced.html Advanced Topics]_ to a separate article.
   * July 23, 2009: Corrected code sample in 3.5.3.
   * December 24, 2008: Corrected code sample in 3.4.
   * July 14, 2008: Added information about subrequests; slight reorganization
@@ -1108,4 +1108,4 @@ This guide covers the basics of Nginx module development. For tips on writing mo
   * May 4, 2007: Added information about load-balancers
   * April 28, 2007: Initial draft
 
-[/ Back to Evan Miller's Homepage]
+[https://code.googhttps:/ Back to Evan Miller's Homepage]
