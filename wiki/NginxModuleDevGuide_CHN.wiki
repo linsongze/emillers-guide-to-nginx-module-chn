@@ -1,7 +1,5 @@
 #summary Emiller的Nginx模块开发指南中文版
-{{{
-此翻译基于目前（2010年1月6日）为止，Evan Miller最新的[http://www.evanmiller.org/nginx-modules-guide.html 原版指南]。是我在学习Nginx模块开发的过程中顺手翻译的。首先是因为[http://yaoweibin.cn/maindoc/nginx-modules-guide-cn.pdf yaoweibin的《Emiller的Nginx模块开发指南》]不够新，且被我发现了几个翻的不准确的地方；其次是为了在翻译的过程中学习Nginx的模块开发。如果能方便以后想涉足Nginx开发且看不惯e文的同学就太好不过了。水平有限，错误在所难免，欢迎指正。
-}}}
+
 
 <wiki:toc/>
 
