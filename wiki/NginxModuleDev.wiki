@@ -14,48 +14,47 @@
 
 == 目录 ==
 
-  # [NginxModuleDev#预备知识 预备知识]
-  # [NginxModuleDev#模块委派概述 模块委派概述]
-  # [#components Nginx模块的组成]
-    # [#configuration-structs 模块配置Struct(s)]
-    # [#directives 模块指令]
-    # [#context 模块上下文]
-      # [#create_loc_conf create_loc_conf]
-      # [#merge_loc_conf merge_loc_conf]
-    # [#definition 模块定义]
-    # [#installation 模块装载]
-  # [#handlers Handlers]
-    # [#non-proxying 剖析 Handler(非代理)]
-      # [#non-proxying-config 获取location配置]
-      # [#non-proxying-response 生成响应]
-      # [#non-proxying-header 发送响应头]
-      # [#non-proxying-body 发送响应体]
-    # [#proxying 剖析Upstream (又称 Proxy) Handler]
-      # [#proxying-summary Upstream 回调函数概要]
-      # [#create_request create_request 回调函数]
-      # [#process_header process_header 回调函数]
-      # [#keeping-state 状态保持]
-    # [#handler-installation Handler的装载]
-  # [#filters Filters]
-    # [#filters-header 剖析Header Filter]
-    # [#filters-body 剖析Body Filter]
-    # [#filters-installation Filter的装载]
-  # [#load_balancers Load-Balancers]
-    # [#lb-directive 启用指令]
-    # [#lb-registration 注册函数]
-    # [#lb-upstream upstream 初始化函数]
-    # [#lb-peer 对端初始化函数]
-    # [#lb-function 负载均衡函数]
-    # [#lb-release 对端释放函数]
-  # [#compiling 编写并编译一个新的Nginx模块]
-  # [#advanced 高级话题]
-  # [#code 代码引用]
+=== [NginxModuleDev#1._预备知识] ===
+=== [NginxModuleDev#2._模块委派概述] ===
+=== [NginxModuleDev#3._Nginx模块的组成] ===
+==== [NginxModuleDev#3.1_模块配置Struct(s)]
+==== [NginxModuleDev#3.2_模块指令] ====
+==== [NginxModuleDev#3.3_模块上下文] ====
+===== [NginxModuleDev#3.3.1_create_loc_conf] =====
+===== [NginxModuleDev#3.3.2_merge_loc_conf] =====
+==== [NginxModuleDev#3.4_模块定义] ====
+==== [NginxModuleDev#3.5_模块装载] ====
+=== [NginxModuleDev#4_Handlers] ===
+==== [NginxModuleDev#4.1_剖析Handler(非代理)]
+===== [NginxModuleDev#4.1.2_生成响应] =====
+===== [NginxModuleDev#4.1.3_发送响应头] =====
+===== [NginxModuleDev#4.1.4_发送响应体] =====
+==== [NginxModuleDev#4.2_剖析Upstream(又称 Proxy) Handler] ====
+===== [NginxModuleDev#4.2.1_Upstream回调函数概要] =====
+===== [NginxModuleDev#4.2.2_create_request回调函数] =====
+===== [NginxModuleDev#4.2.3_process_header回调函数] =====
+===== [NginxModuleDev#4.2.4_状态保持] =====
+==== [NginxModuleDev#4.3_Handler的装载] ====
+=== [NginxModuleDev#5_Filters] ===
+==== [NginxModuleDev#5.1_剖析Header_Filter] ====
+==== [NginxModuleDev#5.2_剖析Body_Filter] ====
+==== [NginxModuleDev#5.3_Filter的装载] ====
+=== [NginxModuleDev#6_Load-Balancers] ===
+==== [NginxModuleDev#6.1_启用指令] ====
+==== [NginxModuleDev#6.2_注册函数] ====
+==== [NginxModuleDev#6.3_upstream初始化函数] ====
+==== [NginxModuleDev#6.4_对端初始化函数] ====
+==== [NginxModuleDev#6.5_负载均衡函数] ====
+==== [NginxModuleDev#6.6_对端释放函数] ====
+=== [NginxModuleDev#7_编写并编译一个新的Nginx模块] ===
+=== [NginxModuleDev#8_高级话题] ===
+=== [NginxModuleDev#9_代码参考] ===
 
-== 预备知识 ==
+== 1. 预备知识 ==
 
  你应当比较熟悉C语言。不光是“C-语法"，你起码还得知道结构体和预处理指令，同时保证看到指针和函数引用出现时心里不会发毛。否则的话，就算信春哥也是没用的，看看[http://en.wikipedia.org/wiki/The_C_Programming_Language_(book) K&R]吧。 你得对HTTP协议有一定的了解，毕竟你是在和一个web server打交道。 如果你熟悉Nginx的配置文件就太好不过了。如果不熟悉，也没关系，这里简单介绍一下，知道概念先：Nginx配置文件主要分成四部分：main（全局设置）、server（主机设置）、upstream（上游服务器设置）和location（URL匹配特定位置后的设置）。每部分包含若干个指令。main部分设置的指令将影响其它所有设置；server部分的指令主要用于指定主机和端口；upstream的指令用于设置一系列的后端服务器；location部分用于匹配网页位置（比如，根目录“/”,“/images”,等等）。他们之间的关系式：server继承main，location继承server；upstream既不会继承指令也不会被继承。它有自己的特殊指令，不需要在其他地方的应用。在下面很多地方都会涉及这四个部分，切记。 好了，让我们开始吧。
 
-== 2. Nginx模块委派概述 ==
+== Nginx模块委派概述 ==
 
  Nginx的模块有三种角色：
 
@@ -333,7 +332,7 @@ ngx_module_t  ngx_http__module = {
 
  接下来我们把模块的细节放到显微镜下面来看，它们到底怎么运行的。
 
-=== 4.1. 剖析 Handler(非代理) ===
+=== 4.1. 剖析Handler(非代理) ===
 
  Handler一般做4件事：获取location配置;生成合适的响应;发送响应头;发送响应体。Handler有一个参数，即请求结构体。请求结构体包含很多关于客户请求的有用信息，比如说请求方法，URI，请求头等等。我们一个个地来看。
 
@@ -476,7 +475,7 @@ typedef stuct {
 
 }}}
 
-=== 4.2. 剖析Upstream (又称 Proxy) Handler ===
+=== 4.2. 剖析Upstream(又称 Proxy) Handler ===
 
  我已经帮你了解了如何让你的handler来产生响应。有些时候你可以用一小段C代码就可以得到响应，但是通常情况下你需要同另外一台server打交道（比如你正在写一个用来实现某种网络协议的模块）。你当然可以自己实现一套网络编程的东东，但是如果你只收到部分的响应，需要等待余下的响应数据，你会怎么办？你不会想阻塞整个事件处理循环吧？这样会毁掉Nginx的良好性能！幸运的是，Nginx允许你在它处理后端服务器（叫做"upstreams"）的机制上加入你的回调函数,因此你的模块将可以和其他的server通信,同时还不会妨碍其他的请求。这一节将介绍模块如何和一个upstream（如Memcached, FastCGI,或者另一个 HTTP server）通信。
 
