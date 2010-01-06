@@ -14,7 +14,7 @@
 
 == 目录 ==
 
-  # [ NginxModuleDev#预备知识]
+  # [NginxModuleDev#预备知识]
   # [NginxModuleDev#模块委派概述]
   # [#components Nginx模块的组成]
     # [#configuration-structs 模块配置Struct(s)]
