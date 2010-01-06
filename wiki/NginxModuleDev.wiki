@@ -14,7 +14,7 @@
 
 == 目录 ==
 
-  # [#1预备知识 预备知识]
+  # [#预备知识 预备知识]
   # [NginxModuleDev#模块委派概述]
   # [#components Nginx模块的组成]
     # [#configuration-structs 模块配置Struct(s)]
@@ -52,7 +52,7 @@
   # [#code 代码引用]
 
 
-== 1预备知识 ==
+== 预备知识 ==
 
  你应当比较熟悉C语言。不光是“C-语法"，你起码还得知道结构体和预处理指令，同时保证看到指针和函数引用出现时心里不会发毛。否则的话，就算信春哥也是没用的，看看[http://en.wikipedia.org/wiki/The_C_Programming_Language_(book) K&R]吧。 你得对HTTP协议有一定的了解，毕竟你是在和一个web server打交道。 如果你熟悉Nginx的配置文件就太好不过了。如果不熟悉，也没关系，这里简单介绍一下，知道概念先：Nginx配置文件主要分成四部分：main（全局设置）、server（主机设置）、upstream（上游服务器设置）和location（URL匹配特定位置后的设置）。每部分包含若干个指令。main部分设置的指令将影响其它所有设置；server部分的指令主要用于指定主机和端口；upstream的指令用于设置一系列的后端服务器；location部分用于匹配网页位置（比如，根目录“/”,“/images”,等等）。他们之间的关系式：server继承main，location继承server；upstream既不会继承指令也不会被继承。它有自己的特殊指令，不需要在其他地方的应用。在下面很多地方都会涉及这四个部分，切记。 好了，让我们开始吧。
 
