@@ -599,7 +599,7 @@ ngx_http_character_server_process_header(ngx_http_request_t *r)
 
 ==== 4.2.4. 状态保持 ====
 
- 好了，还记得我说过`abort_request`, `reinit_request`和`finalize_request` 可以用来重置内部状态吗？这是因为许多upstream模块都有其内部状态。模块需要定义一个_自定义上下文结构_，来标记目前为止从upstream读到了什么。这跟之前说的“模块上下文”不是一个概念。“模块上下文”是预定义类型，而自定义上下文结构可以包含任何你需要的数据和字段（这可是你自己定义的结构体）。这个结构体在`create_request`函数中被实例化，大概像这样：
+ 好了，还记得我说过`abort_request`, `reinit_request`和`finalize_request` 可以用来重置内部状态吗？这是因为许多upstream模块都有其内部状态。模块需要定义一个_ 自定义上下文结构 _ ，来标记目前为止从upstream读到了什么。这跟之前说的“模块上下文”不是一个概念。“模块上下文”是预定义类型，而自定义上下文结构可以包含任何你需要的数据和字段（这可是你自己定义的结构体）。这个结构体在`create_request`函数中被实例化，大概像这样：
 
 {{{
     ngx_http_character_server_ctx_t   *p;   /* my custom context struct */
@@ -838,7 +838,7 @@ ngx_http_chunked_filter_init(ngx_conf_t *cf)
  一个load-balancer分为六个部分:
 
   # 启用配置指令 (e.g, `hash;`) 将会调用_注册函数_
-  # 注册函数将定义一些合法的`server` 参数 (e.g., `weight=`) 并注册一个_upstream初始化函数_
+  # 注册函数将定义一些合法的`server` 参数 (e.g., `weight=`) 并注册一个_ upstream初始化函数 _
   # upstream初始化函数将在配置经过验证后被调用，并且:
     * 解析 `server` 名称为特定的IP地址
     * 为每个sokcet连接分配空间
@@ -1157,7 +1157,9 @@ ngx_http_upstream_free_hash_peer(ngx_peer_connection_t *pc, void *data,
   * "config"
   * "ngx_http_<your module>_module.c"
 
- The "config" file will be included by `./configure`, and its contents will depend on the type of module. *"config" for filter modules:*
+ The "config" file will be included by `./configure`, and its contents will depend on the type of module. 
+
+*"config" for filter modules:*
 
 {{{
 ngx_addon_name=ngx_http__module
@@ -1166,7 +1168,7 @@ NGX_ADDON_SRCS="$NGX_ADDON_SRCS $ngx_addon_dir/ngx_http__module.c"
 
 }}}
 
- *"config" for other modules:*
+*"config" for other modules:*
 
 {{{
 ngx_addon_name=ngx_http__module
