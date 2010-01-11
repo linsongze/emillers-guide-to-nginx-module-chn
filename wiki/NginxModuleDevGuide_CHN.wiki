@@ -291,7 +291,7 @@ ngx_http_circle_gif_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
 
 === 3.4. 模块定义 ===
 
- 接下来我们间接地介绍更深一层：结构体`ngx_module_t`。该结构体变量命名方式为`ngx_http_<module name>_module`。它包含模块的内容和指令执行方式，同时也还包含一些回调函数（退出线程，退出进程，等等）。模块定义在有的时候会被用作查找的关键字，来查找与特定模块相关联的数据。模块定义通常像是这样： Next we add one more layer of indirection, the `ngx_module_t` struct. The variable is called `ngx_http_<module name>_module`. This is where references to the context and directives go, as well as the remaining callbacks (exit thread, exit process, etc.). The module definition is sometimes used as a key to look up data associated with a particular module. The module definition usually looks like this:
+ 接下来我们间接地介绍更深一层：结构体`ngx_module_t`。该结构体变量命名方式为`ngx_http_<module name>_module`。它包含模块的内容和指令执行方式，同时也还包含一些回调函数（退出线程，退出进程，等等）。模块定义在有的时候会被用作查找的关键字，来查找与特定模块相关联的数据。模块定义通常像是这样：
 
 {{{
 ngx_module_t  ngx_http__module = {
@@ -478,7 +478,7 @@ typedef stuct {
 
 ==== 4.2.1. Upstream 回调函数概要 ====
 
- Unlike the handler function for other modules, the handler function of an upstream module does little "real work". It does _not_ call `ngx_http_output_filter`. It merely sets callbacks that will be invoked when the upstream server is ready to be written to and read from. There are actually 6 available hooks: 与其他模块的回调处理函数不一样，upstream模块的处理函数几乎不做“实事”。它_压根不_调用`ngx_http_output_filter`。它仅仅是告诉回调函数什么时候可以向upstream server写数据了，以及什么时候能从upstream server读数据了。实际上它有6个可用的钩子： `create_request` 生成发送到upstream server的请求缓冲（或者一条缓冲链） `reinit_request` 在与后端服务器连接被重置的情况下（在`create_request` 被第二次调用之前）被调用 `process_header` 处理upstream 响应的第一个bit，通常是保存一个指向upstream "payload"的指针 `abort_request` 在客户端放弃请求时被调用 `finalize_request` 在Nginx完成从upstream读取数据后调用 `input_filter` 这是一个消息体的filter，用来处理响应消息体(例如把尾部删除) 这些钩子是怎么勾上去的呢？下面是一个例子，简单版本的代理模块处理函数：
+ 与其他模块的回调处理函数不一样，upstream模块的处理函数几乎不做“实事”。它_压根不_调用`ngx_http_output_filter`。它仅仅是告诉回调函数什么时候可以向upstream server写数据了，以及什么时候能从upstream server读数据了。实际上它有6个可用的钩子： `create_request` 生成发送到upstream server的请求缓冲（或者一条缓冲链） `reinit_request` 在与后端服务器连接被重置的情况下（在`create_request` 被第二次调用之前）被调用 `process_header` 处理upstream 响应的第一个bit，通常是保存一个指向upstream "payload"的指针 `abort_request` 在客户端放弃请求时被调用 `finalize_request` 在Nginx完成从upstream读取数据后调用 `input_filter` 这是一个消息体的filter，用来处理响应消息体(例如把尾部删除) 这些钩子是怎么勾上去的呢？下面是一个例子，简单版本的代理模块处理函数：
 
 {{{
 static ngx_int_t
