@@ -9,7 +9,7 @@
  By [http://www.evanmiller.org/ Evan Miller] DRAFT: August 13, 2009 ([#changes changes]) 
 
 
- 翻译：[http://www.1983th.cn/ Cartman_Kong] @2010年1月5日 0:04am -- 2010-01-06 13:55pm 
+ 翻译：[http://www.kongch.com/ Kongch] @2010年1月5日 0:04am -- 2010-01-06 13:55pm 
 
 
 == 1. 预备知识 ==
